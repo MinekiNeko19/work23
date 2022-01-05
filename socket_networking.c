@@ -70,4 +70,5 @@ int client_handshake() {
 
   int sd = socket(results->ai_family, results->ai_socktype, results->ai_protocol);
   connect(sd, results->ai_addr, results->ai_addrlen);
+  return sd;
 }
