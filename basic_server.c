@@ -16,13 +16,13 @@ int main() {
 
   int to_client;
   int from_client;
+  from_client = server_setup();
 
   while (1) {
-    int from_client = server_setup();
 
-    int f = fork();
+    // int f = fork();
 
-    if (f == 0) { // child
+    // if (f == 0) { // child
       // connects to client in child process
       to_client = server_connect(from_client);
       
@@ -40,7 +40,7 @@ int main() {
       // sends input back to client
       write(to_client, input, 100);
 
-      exit(0);
-    }
+      // exit(0);
+    // }
   }
 }
