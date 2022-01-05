@@ -4,167 +4,70 @@
 /*=========================
   server_setup
   args:
-
-  creates the WKP (upstream) and opens it, waiting for a
-  connection.
-
-  removes the WKP once a connection has been made
-
-  returns the file descriptor for the upstream pipe.
+  returns socket descriptor
   =========================*/
 int server_setup() {
-  int from_client = 0;
-  int b;
+  // sets up addrinfo and hints to set up socket
+  struct addrinfo * hints, * results;
+  hints = calloc(1,sizeof(struct addrinfo));
+  hints->ai_family = AF_INET;
+  hints->ai_socktype = SOCK_STREAM; // for TCP ports
+  hints->ai_flags = AI_PASSIVE; // ???
+  getaddrinfo(NULL, "80", hints, &results); // NULL to connect with multiple clients, port 80
+  // does the search for the ports and stuff
 
-  printf("[server] handshake: making wkp\n");
-  b = mkfifo(WKP, 0600);
-  if ( b == -1 ) {
-    printf("mkfifo error %d: %s\n", errno, strerror(errno));
-    exit(-1);
-  }
-  //open & block
-  from_client = open(WKP, O_RDONLY, 0);
-  //remove WKP
-  remove(WKP);
+  // make the socket
+  int soc = socket(results->ai_family, results->ai_socktype, results->ai_protocol);
 
-  printf("[server] handshake: removed wkp\n");
-
-  return from_client;
+  // bind the port
+  bind(soc,results->ai_addr, results->ai_addrlen);
+  printf("setup completed\n");
+  return soc;
 }
 
 /*=========================
   server_connect
-  args: int from_client
-
-  handles the subserver portion of the 3 way handshake
-
-  returns the file descriptor for the downstream pipe.
+  args: int socket_descriptor
   =========================*/
-int server_connect(int from_client) {
-  int to_client  = 0;
-  int b;
-  char buffer[HANDSHAKE_BUFFER_SIZE];
+int server_connect(int soc) {
+  // set up addrinfo
+  struct addrinfo * hints, * results;
+  hints = calloc(1,sizeof(struct addrinfo));
+  hints->ai_family = AF_INET;
+  hints->ai_socktype = SOCK_STREAM; // for TCP ports
+  hints->ai_flags = AI_PASSIVE; // ???
+  getaddrinfo(NULL, "80", hints, &results);
 
-  //read initial message
-  b = read(from_client, buffer, sizeof(buffer));
-  int numid = atoi(buffer);
-  printf("[subserver %d] handshake received: -%s-\n", numid, buffer);
+  // listen
+  listen(soc,10);
 
+  // accept
+  int client_socket; 
+  socklen_t sock_size;
+  struct sockaddr_storage client_address;
+  sock_size = sizeof(client_address);
+  printf("[server] server waiting to accept\n");
+  client_socket = accept(soc,(struct sockaddr *)&client_address, &sock_size);
 
-  to_client = open(buffer, O_WRONLY, 0);
-  //create SYN_ACK message
-  srand(time(NULL));
-  int r = rand() % HANDSHAKE_BUFFER_SIZE;
-  sprintf(buffer, "%d", r);
-
-  write(to_client, buffer, sizeof(buffer));
-  //rad and check ACK
-  read(from_client, buffer, sizeof(buffer));
-  int ra = atoi(buffer);
-  if (ra != r+1) {
-    printf("[subserver %d] handshake received bad ACK: -%s-\n", numid, buffer);
-    exit(0);
-  }//bad response
-  printf("[subserver %d] handshake received: -%s-\n", numid, buffer);
-
-  return to_client;
-}
-
-
-/*=========================
-  server_handshake
-  args: int * to_client
-
-  Performs the server side pipe 3 way handshake.
-  Sets *to_client to the file descriptor to the downstream pipe.
-
-  returns the file descriptor for the upstream pipe.
-  =========================*/
-int server_handshake(int *to_client) {
-  int b, from_client;
-  char buffer[HANDSHAKE_BUFFER_SIZE];
-
-  printf("[server] handshake: making wkp\n");
-  b = mkfifo(WKP, 0600);
-  if ( b == -1 ) {
-    printf("mkfifo error %d: %s\n", errno, strerror(errno));
-    exit(-1);
-  }
-  //open & block
-  from_client = open(WKP, O_RDONLY, 0);
-  //remove WKP
-  remove(WKP);
-
-  printf("[server] handshake: removed wkp\n");
-  //read initial message
-  b = read(from_client, buffer, sizeof(buffer));
-  printf("[server] handshake received: -%s-\n", buffer);
-
-
-  *to_client = open(buffer, O_WRONLY, 0);
-  //create SYN_ACK message
-  srand(time(NULL));
-  int r = rand() % HANDSHAKE_BUFFER_SIZE;
-  sprintf(buffer, "%d", r);
-
-  write(*to_client, buffer, sizeof(buffer));
-  //rad and check ACK
-  read(from_client, buffer, sizeof(buffer));
-  int ra = atoi(buffer);
-  if (ra != r+1) {
-    printf("[server] handshake received bad ACK: -%s-\n", buffer);
-    exit(0);
-  }//bad response
-  printf("[server] handshake received: -%s-\n", buffer);
-
-  return from_client;
+  // free
+  free(hints);
+  freeaddrinfo(results);
 }
 
 
 /*=========================
   client_handshake
-  args: int * to_server
-
-  Performs the client side pipe 3 way handshake.
-  Sets *to_server to the file descriptor for the upstream pipe.
-
-  returns the file descriptor for the downstream pipe.
+  args:
   =========================*/
-int client_handshake(int *to_server) {
+int client_handshake() {
+  // set up addrinfo
+  struct addrinfo * hints, * results;
+  hints = calloc(1,sizeof(struct addrinfo));
+  hints->ai_family = AF_INET;
+  hints->ai_socktype = SOCK_STREAM; // for TCP ports
+  getaddrinfo("127.0.0.1", "80", hints, &results); // localhost rn
 
-  int from_server;
-  char buffer[HANDSHAKE_BUFFER_SIZE];
-  char ppname[HANDSHAKE_BUFFER_SIZE];
 
-  //make private pipe
-  printf("[client] handshake: making pp\n");
-  sprintf(ppname, "%d", getpid() );
-  mkfifo(ppname, 0600);
-
-  //send pp name to server
-  printf("[client] handshake: connecting to wkp\n");
-  *to_server = open( WKP, O_WRONLY, 0);
-  if ( *to_server == -1 ) {
-    printf("open error %d: %s\n", errno, strerror(errno));
-    exit(1);
-  }
-
-  write(*to_server, ppname, sizeof(buffer));
-  //open and wait for connection
-  from_server = open(ppname, O_RDONLY, 0);
-
-  read(from_server, buffer, sizeof(buffer));
-  /*validate buffer code goes here */
-  printf("[client] handshake: received -%s-\n", buffer);
-
-  //remove pp
-  remove(ppname);
-  printf("[client] handshake: removed pp\n");
-
-  //send ACK to server
-  int r = atoi(buffer) + 1;
-  sprintf(buffer, "%d", r);
-  write(*to_server, buffer, sizeof(buffer));
-
-  return from_server;
+  int sd = socket(results->ai_family, results->ai_socktype, results->ai_protocol);
+  connect(sd, results->ai_addr, results->ai_addrlen);
 }

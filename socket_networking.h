@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <netdb.h>
 
 #ifndef NETWORKING_H
 #define NETWORKING_H
@@ -19,10 +20,10 @@
 
 //for forking server
 int server_setup();
-int server_connect(int from_client);
+int server_connect();
 
 
-int server_handshake(int *to_client);
-int client_handshake(int *to_server);
+// int server_handshake();
+int client_handshake();
 
 #endif
