@@ -6,7 +6,7 @@ int main() {
     int to_server;
     int from_server;
 
-    from_server = client_handshake("127.0.0.1");
+    from_server = client_handshake();
 
     // gets user input
     char input[100];
