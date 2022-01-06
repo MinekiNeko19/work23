@@ -24,9 +24,10 @@ int main() {
     // to_client = server_connect(from_client);
     to_client = from_client;
 
-    int f = fork();
+    // int f = fork();
 
-    if (f == 0) { // child
+    // if (f == 0) { // child
+      printf("child process\n");
       
       // get input from client
       char input[100];
@@ -46,9 +47,8 @@ int main() {
       // sends input back to client
       printf("[server] writing to socket\n");
       write(to_client, input, 100);
-      printf("[server] finished writing\n");
-
-      exit(0);
-    }
+      printf("[server] finished writing; end of child\n");
+    //   exit(0);
+    // }
   }
 }
