@@ -20,7 +20,7 @@
 
 //for forking server
 int server_setup();
-// int server_connect();
+int server_connect();
 
 
 // int server_handshake();

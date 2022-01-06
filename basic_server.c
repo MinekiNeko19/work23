@@ -16,23 +16,18 @@ int main() {
 
   int to_client;
   int from_client;
-  // from_client = server_setup();
+  from_client = server_setup();
 
   while (1) {
     // connects to client in child process
-    from_client = server_setup();
+    // from_client = server_setup();
     // to_client = server_connect(from_client);
-    to_client = from_client;
-
-    // int f = fork();
-
-    // if (f == 0) { // child
-      printf("child process\n");
+    to_client = server_connect(from_client);
       
       // get input from client
       char input[100];
       printf("[server] reading from client\n");
-      read(from_client, input, 100);
+      read(to_client, input, 100);
       printf("[server] received %s\n",input);
 
       // modify input
@@ -47,8 +42,6 @@ int main() {
       // sends input back to client
       printf("[server] writing to socket\n");
       write(to_client, input, 100);
-      printf("[server] finished writing; end of child\n");
-    //   exit(0);
-    // }
+      printf("[server] finished writing\n");
   }
 }

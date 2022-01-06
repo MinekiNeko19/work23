@@ -25,24 +25,16 @@ int server_setup() {
   bind(soc,results->ai_addr, results->ai_addrlen);
   printf("setup completed\n");
 
-//   free(hints);
-//   freeaddrinfo(results);
-//   return soc;
-// }
+  free(hints);
+  freeaddrinfo(results);
+  return soc;
+}
 
-// /*=========================
-//   server_connect
-//   args: int socket_descriptor
-//   =========================*/
-// int server_connect(int soc) {
-//   // set up addrinfo
-//   struct addrinfo * hints, * results;
-//   hints = calloc(1,sizeof(struct addrinfo));
-//   hints->ai_family = AF_INET;
-//   hints->ai_socktype = SOCK_STREAM; // for TCP ports
-//   hints->ai_flags = AI_PASSIVE; // ???
-//   getaddrinfo(NULL, "7010", hints, &results);
-
+/*=========================
+  server_connect
+  args: int socket_descriptor
+  =========================*/
+int server_connect(int soc) {
   // listen
   listen(soc,10);
 
@@ -53,30 +45,6 @@ int server_setup() {
   sock_size = sizeof(client_address);
   printf("[server] server waiting to accept\n");
   client_socket = accept(soc,(struct sockaddr *)&client_address, &sock_size);
-
-  write(client_socket, "message",7);
-  // char input[100];
-  // printf("[server] reading from client\n");
-  // read(client_socket, input, 100);
-  // printf("[server] received %s\n",input);
-  
-  // // modify input
-  // printf("[server] initializing modifications\n");
-  // int i = 0;
-  // while (input[i] != '\n') {
-  //   input[i] = toupper(input[i]);
-  //   i++;
-  // }
-  // printf("[server] modified input\n");
-
-  // // sends input back to client
-  // printf("[server] writing to socket\n");
-  // write(client_socket, input, 100);
-  // printf("[server] finished writing\n");
-
-  // free
-  free(hints);
-  freeaddrinfo(results);
   return client_socket;
 }
 
