@@ -8,6 +8,7 @@ int main() {
 
     from_server = client_handshake(&to_server);
 
+    while (1) {
     // gets user input
     char input[100];
     
@@ -23,4 +24,5 @@ int main() {
 
     // prints returned input
     printf("Server returned: %s\n", input2);
+    }
 }
