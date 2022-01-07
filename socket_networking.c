@@ -59,7 +59,7 @@ int client_handshake(int * to_server) {
   hints = calloc(1,sizeof(struct addrinfo));
   hints->ai_family = AF_INET;
   hints->ai_socktype = SOCK_STREAM; // for TCP ports
-  getaddrinfo("127.0.0.1", "7010", hints, &results); // localhost rn
+  getaddrinfo("149.89.150.129", "7010", hints, &results); // localhost rn
   if (errno) {
     printf("error %d: %s\n",errno, strerror(errno));
     errno = 0;
