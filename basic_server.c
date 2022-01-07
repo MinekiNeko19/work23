@@ -29,23 +29,23 @@ int main() {
     if (f == 0) {
       // get input from client
       char input[100];
-      printf("[server] reading from client\n");
+      printf("[subserver] reading from client\n");
       read(to_client, input, 100);
-      printf("[server] received %s\n",input);
+      printf("[subserver] received %s\n",input);
 
       // modify input
-      printf("[server] initializing modifications\n");
+      printf("[subserver] initializing modifications\n");
       int i = 0;
       while (input[i] != '\n') {
         input[i] = toupper(input[i]);
         i++;
       }
-      printf("[server] modified input %s\n",input);
+      printf("[subserver] modified input %s\n",input);
 
       // sends input back to client
-      printf("[server] writing to socket\n");
+      printf("[subserver] writing to socket\n");
       write(to_client, input, 100);
-      printf("[server] finished writing\n");
+      printf("[subserver] finished writing\n");
     }
   }
 }
