@@ -28,6 +28,7 @@ int main() {
     
     if (f == 0) {
       // get input from client
+      while (1) {
       char input[100];
       printf("[subserver] reading from client\n");
       read(to_client, input, 100);
@@ -46,6 +47,7 @@ int main() {
       printf("[subserver] writing to socket\n");
       write(to_client, input, 100);
       printf("[subserver] finished writing\n");
+      }
     }
   }
 }

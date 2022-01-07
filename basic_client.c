@@ -17,7 +17,7 @@ int main() {
     fgets(input, 100, stdin);
 
     // sends input to server
-    write(to_server, input, 100);
+    write(from_server, input, 100);
 
     // receives input from server
     read(from_server, input2, 100);
